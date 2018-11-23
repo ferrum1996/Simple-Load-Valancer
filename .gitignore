@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+#IDE files
+.ycm_extra_conf.py
+/cmake-build-debug
+/.idea
