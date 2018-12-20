@@ -10,6 +10,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <ctime>
 #include <boost/bind.hpp>
+#include <iostream>
 
 class tcp_connection : public boost::enable_shared_from_this<tcp_connection>{
 
@@ -30,8 +31,11 @@ private:
     void handle_write(const boost::system::error_code& /*error*/,
                       size_t /*bytes_transferred*/){};
 
+    void read_handler(const boost::system::error_code& error, std::size_t bytes_transferred );
+
     boost::asio::ip::tcp::socket socket_;
     std::string message_;
+    char data_buffer[1024];
 
 };
 

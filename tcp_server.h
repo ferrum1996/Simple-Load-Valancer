@@ -24,7 +24,7 @@ class tcp_server {
                 const boost::system::error_code& error
         );
 
-    boost::asio::ip::tcp::acceptor acceptor_;
+        boost::asio::ip::tcp::acceptor acceptor_;
 };
 
 

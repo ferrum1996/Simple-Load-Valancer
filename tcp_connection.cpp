@@ -20,15 +20,22 @@ boost::asio::ip::tcp::socket& tcp_connection::socket() {
 }
 
 void tcp_connection::start() {
+
+
+    socket_.read_some(boost::asio::buffer(data_buffer));
+
+    std::cout << data_buffer << std::endl;
+
     message_ = make_daytime_string();
 
-    boost::asio::async_write(
-            socket_,
-            boost::asio::buffer(message_),
-            boost::bind(&tcp_connection::handle_write, shared_from_this(),
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred)
-            );
+    socket_.write_some(boost::asio::buffer(message_));
+}
+
+void tcp_connection::read_handler(
+        const boost::system::error_code& error, // Result of operation.
+        std::size_t bytes_transferred           // Number of bytes read.
+){
+    std::cout << bytes_transferred << std::endl;
 }
 
 
