@@ -37,8 +37,26 @@ private:
     explicit tcp_connection(asio::io_context& io_context)
             : socket_(io_context){};
 
+
     template<class Body, class Allocator, class Send>
-    void handle_request(beast::string_view doc_root, http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send);
+    void handle_request (
+            http::request<Body, http::basic_fields<Allocator>>&& request,
+            Send&& send)
+    {
+        beast::error_code ec;
+        http::string_body::value_type body;
+
+        auto const size = body.size();
+
+        // Respond to request
+        http::response<http::string_body> response{http::status::ok, request.version()};
+        response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        response.set(http::field::content_type, "application/json");
+        response.body()= R"({"message":"HELLO MESSAGE"})";
+        response.prepare_payload();
+        response.keep_alive(request.keep_alive());
+        return send(std::move(response));
+    }
 
 
     tcp::socket socket_;
