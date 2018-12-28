@@ -6,11 +6,20 @@
 #define SIMPLE_LOAD_VALANCER_TCP_CONNECTION_H
 
 #include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <ctime>
 #include <boost/bind.hpp>
 #include <iostream>
+#include <boost/beast/http.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/version.hpp>
+
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace asio = boost::asio;
+using tcp = asio::ip::tcp;
 
 class tcp_connection : public boost::enable_shared_from_this<tcp_connection>{
 
@@ -18,22 +27,21 @@ public:
 
     typedef boost::shared_ptr<tcp_connection> pointer;
 
-    static pointer create(boost::asio::io_context& io_context);
+    static pointer create(asio::io_context& io_context);
 
-    boost::asio::ip::tcp::socket& socket();
+    tcp::socket& socket();
 
     void start();
 
 private:
-    explicit tcp_connection(boost::asio::io_context& io_context)
-            : socket_(io_context){}
+    explicit tcp_connection(asio::io_context& io_context)
+            : socket_(io_context){};
 
-    void handle_write(const boost::system::error_code& /*error*/,
-                      size_t /*bytes_transferred*/){};
+    template<class Body, class Allocator, class Send>
+    void handle_request(beast::string_view doc_root, http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send);
 
-    void read_handler(const boost::system::error_code& error, std::size_t bytes_transferred );
 
-    boost::asio::ip::tcp::socket socket_;
+    tcp::socket socket_;
     std::string message_;
     char data_buffer[1024];
 

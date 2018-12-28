@@ -5,37 +5,57 @@
 #include "tcp_connection.h"
 
 
-std::string make_daytime_string() {
-    using namespace std; // For time_t, time and ctime;
-    time_t now = time(0);
-    return ctime(&now);
+std::string make_response() {
+    return "hello world";
 }
 
-tcp_connection::pointer tcp_connection::create(boost::asio::io_context& io_context) {
+tcp_connection::pointer tcp_connection::create(asio::io_context& io_context) {
     return pointer(new tcp_connection(io_context));
 }
 
-boost::asio::ip::tcp::socket& tcp_connection::socket() {
+tcp::socket& tcp_connection::socket() {
     return socket_;
 }
 
 void tcp_connection::start() {
 
+    beast::error_code error_code;
+    beast::multi_buffer multi_buffer;
 
-    socket_.read_some(boost::asio::buffer(data_buffer));
+    http::request<http::string_body> request;
 
-    std::cout << data_buffer << std::endl;
+    http::read(socket_, multi_buffer, request, error_code);;
 
-    message_ = make_daytime_string();
+    std::cout << "REQUEST: " << request << std::endl;
+    std::cout << "HEADERS: " << request.base() << std::endl;
+    std::cout << "BODY: " << request.body() << std::endl;
 
-    socket_.write_some(boost::asio::buffer(message_));
+    message_ = make_response();
+
+    socket_.write_some(asio::buffer(message_));
+
 }
 
-void tcp_connection::read_handler(
-        const boost::system::error_code& error, // Result of operation.
-        std::size_t bytes_transferred           // Number of bytes read.
-){
-    std::cout << bytes_transferred << std::endl;
-}
+template<
+        class Body, class Allocator,
+        class Send>
+void
+handle_request(
+        beast::string_view doc_root,
+        http::request<Body, http::basic_fields<Allocator>>&& request,
+        Send&& send)
+{
+    beast::error_code ec;
+    http::string_body::value_type body;
 
+    auto const size = body.size();
+
+    // Respond to request
+    http::response<http::string_body> response{http::status::ok, request.version()};
+    response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_type, "application/json");
+    response.content_length(size);
+    response.keep_alive(request.keep_alive());
+    return send(std::move(response));
+}
 
