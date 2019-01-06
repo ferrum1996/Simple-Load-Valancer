@@ -4,6 +4,6 @@ project(Simple_Load_Valancer)
 set(CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system filesystem thread REQUIRED)
 
-add_executable(Simple_Load_Valancer main.cpp tcp_server.cpp tcp_server.h tcp_connection.cpp tcp_connection.h)
+add_executable(Simple_Load_Valancer main.cpp tcp_server.cpp tcp_server.h tcp_connection.cpp tcp_connection.h async_client.cpp async_client.h)
 target_link_libraries(Simple_Load_Valancer pthread)
 target_link_libraries(Simple_Load_Valancer ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
